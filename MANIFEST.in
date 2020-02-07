@@ -1,0 +1,4 @@
+include README.md
+recursive-include octoprint_sla_plugin/templates *
+recursive-include octoprint_sla_plugin/translations *
+recursive-include octoprint_sla_plugin/static *

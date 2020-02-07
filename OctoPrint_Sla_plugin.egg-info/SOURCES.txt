@@ -1,0 +1,15 @@
+MANIFEST.in
+README.md
+setup.py
+OctoPrint_Sla_plugin.egg-info/PKG-INFO
+OctoPrint_Sla_plugin.egg-info/SOURCES.txt
+OctoPrint_Sla_plugin.egg-info/dependency_links.txt
+OctoPrint_Sla_plugin.egg-info/entry_points.txt
+OctoPrint_Sla_plugin.egg-info/not-zip-safe
+OctoPrint_Sla_plugin.egg-info/requires.txt
+OctoPrint_Sla_plugin.egg-info/top_level.txt
+octoprint_sla_plugin/__init__.py
+octoprint_sla_plugin/static/css/sla_plugin.css
+octoprint_sla_plugin/static/js/sla_plugin.js
+octoprint_sla_plugin/static/less/sla_plugin.less
+octoprint_sla_plugin/templates/README.txt

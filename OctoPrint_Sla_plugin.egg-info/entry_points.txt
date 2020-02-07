@@ -1,0 +1,3 @@
+[octoprint.plugin]
+sla_plugin = octoprint_sla_plugin
+
