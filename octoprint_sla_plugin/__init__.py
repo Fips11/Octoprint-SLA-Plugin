@@ -60,7 +60,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         if self._settings is None:
             return str("cbddlp, photon")
         else:
-            self._logger.info("add Extensions: %s " % self._settings.get(["allowedExten"]))
+            #self._logger.info("add Extensions: %s " % self._settings.get(["allowedExten"]))
             return str(self._settings.get(["allowedExten"]))
 
 
