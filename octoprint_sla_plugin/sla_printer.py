@@ -2,9 +2,16 @@
 # coding=utf-8
 
 import os
-#from .helper import *
+
 from octoprint.filemanager import FileDestinations, NoSuchStorage, valid_file_type, full_extension_tree
 from octoprint.printer.standard import Printer
+from octoprint.util import is_hidden_path, to_unicode, timing
+
+import logging
+
+
+from octoprint.settings import settings
+
 #################################################################################################
 #                                   Sla printer class                                           #
 #################################################################################################
@@ -70,14 +77,43 @@ class Sla_printer(Printer):
 
 		Printer.select_file(self, path, sd, printAfterSelect, user, pos)
 
+
+
 	def start_print(self, pos=None, user=None, *args, **kwargs):
 
 		if self.fileType == "gcode": 
 			Printer.start_print(self, pos, user)
+
+	
+		
 		
 		elif self.fileType == "sla_bin":
-			print("printjob canceled")
+			#Printer.startPrint(self, pos, user, external_sd=True)
+			#print(dir(self._comm))
+			#print("printjob canceled")
 
+			"""
+			Starts the currently loaded print job.
+			Only starts if the printer is connected and operational, not currently printing and a printjob is loaded
+			"""
+			if self._comm is None or not self._comm.isOperational() or self._comm.isPrinting():
+				return
+
+			with self._selectedFileMutex:
+				if self._selectedFile is None:
+					return
+
+			self._fileManager.delete_recovery_data()
+
+			self._lastProgressReport = None
+			self._updateProgressData()
+			self._setCurrentZ(None)
+
+			self._comm.sendCommand("M6030 '{filename}'".format(filename=self._comm._currentFile.getFilename().split(u"/")[-1]))
+
+			#			                 part_of_job=True,
+			#			                 tags=kwargs.get("tags", set()) | {"trigger:printer.start_print"})
+ 
 
 	def add_sd_file(self, filename, path, on_success=None, on_failure=None, *args, **kwargs):
 
@@ -88,6 +124,8 @@ class Sla_printer(Printer):
 
 
 		elif self.fileType == "sla_bin":
+
+			on_success()
 			print("printjob canceled")
 			
 
@@ -100,3 +138,52 @@ class Sla_printer(Printer):
 				return key
 
 		return None
+
+	def split_path(self, path):
+		path = to_unicode(path)
+		split = path.split(u"/")
+		if len(split) == 1:
+			return u"", split[0]
+		else:
+			return self.join_path(*split[:-1]), split[-1]
+
+
+
+class gcode_modifier():
+	def __init__(self):
+		pass
+
+	def get_gcode_receive_modifier(self, comm_instance, line):
+		print(line)
+		
+		if line.startswith('ok V'): # proceed hello command # ok V4.2.20.3_LCDM
+
+			
+			return 'ok start' + line
+
+		else:
+			return line
+
+
+	def get_gcode_send_modifier(self, comm_instance, phase, cmd, cmd_type, gcode,subcode=None , tags=None):
+
+		# suppress comments
+		if cmd.upper().lstrip().startswith(';') or cmd.upper().lstrip().startswith('('): #suppress comment
+			return (None, )
+
+		elif cmd.upper().startswith('M110'): #suppress lienresett
+			return (None, )
+	
+		elif cmd.upper().startswith('M105'):#suppress temppoll
+			return (None, )
+		
+		#elif cmd.upper().startswith('G90'):#suppress temppoll
+		#	return (None, )
+
+		#elif cmd.upper().startswith('G91'):#suppress temppoll
+		#	return (None, )
+		
+		else:
+			print("#####################################################")
+			print(cmd)
+			print("#####################################################")
