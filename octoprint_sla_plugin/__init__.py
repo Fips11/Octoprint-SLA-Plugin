@@ -9,7 +9,7 @@ import os
 from .chitu_comm import chitu_comm
 from .sla_analyser import sla_AnalysisQueue
 from .sla_printer import Sla_printer, gcode_modifier
-from .ui import *
+from .sla_ui import *
 
 import octoprint.plugin
 #import octoprint.util
@@ -63,7 +63,9 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             workAsFlashDrive = True, #false printer use separate flash drive
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
-
+            #hideTempTab = True,
+            hideControlTab = True,
+            hideGCodeTab = True,
             useHeater = False,
             heaterTemp = 30,# C
             heaterTime = 20,#min
