@@ -78,6 +78,8 @@ class Sla_printer(Printer):
 		Printer.select_file(self, path, sd, printAfterSelect, user, pos)
 
 
+	#def startUDPPrint(filename):
+
 
 	def start_print(self, pos=None, user=None, *args, **kwargs):
 
@@ -85,8 +87,6 @@ class Sla_printer(Printer):
 			Printer.start_print(self, pos, user)
 
 	
-		
-		
 		elif self.fileType == "sla_bin":
 			#Printer.startPrint(self, pos, user, external_sd=True)
 			#print(dir(self._comm))
@@ -163,6 +163,7 @@ class gcode_modifier():
 
 		else:
 			return line
+
 
 
 	def get_gcode_send_modifier(self, comm_instance, phase, cmd, cmd_type, gcode,subcode=None , tags=None):

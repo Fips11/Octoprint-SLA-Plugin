@@ -26,7 +26,9 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
                     octoprint.plugin.AssetPlugin,
                     octoprint.plugin.TemplatePlugin,
                     octoprint.plugin.StartupPlugin,
-                    octoprint.plugin.EventHandlerPlugin):
+                    octoprint.plugin.EventHandlerPlugin,
+                    octoprint.plugin.ShutdownPlugin
+                    ):
 
     
     #def __init__(self,**kwargs):
@@ -63,7 +65,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             workAsFlashDrive = True, #false printer use separate flash drive
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
-            #hideTempTab = True,
+            hideTempTab = True,
             hideControlTab = True,
             hideGCodeTab = True,
             useHeater = False,
@@ -105,12 +107,25 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         
         if self._settings.get(["chitu_comm"]):
 
-            Chitu_comm = chitu_comm(self)
-            Chitu_comm.start_listen_reqest()
+            print("#####################################################################################################")
+            print("#####################################################################################################")
+
+            print(dir(self._file_manager))
+            print("#####################################################################################################")
+            print("#####################################################################################################")
+
+            self.Chitu_comm = chitu_comm(self)
+            self.Chitu_comm.start_listen_reqest()
+            self.Chitu_comm.printstartCP(self.sla_printer.select_file) #TODO: TESTEN
             self._logger.info("chitubox udp reciver enabeled")
 
-        configTabs(self)
+        
 
+        self.hideTempTab = self._settings.get_boolean(["hideTempTab"])
+        self.hideControlTab = self._settings.get_boolean(["hideControlTab"])
+        self.hideGCodeTab = self._settings.get_boolean(["hideGCodeTab"])
+
+        setTabs(self)
 
         self._settings.global_set(["serial", "helloCommand"], self._settings.get(["helloCommand"]))
         self._settings.global_set(["serial", "disconnectOnErrors"], False)
@@ -128,7 +143,8 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
 
         #more at octoprint/settings.py
-
+    def on_shutdown(self):
+        self.Chitu_comm.shutdownService()
 
     ##############################################
     #               File analysis                #
@@ -142,20 +158,14 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
     ##############################################
     
     def get_sla_printer_factory(self,components):
-        return Sla_printer(components["file_manager"],components["analysis_queue"],components["printer_profile_manager"])
+
+        self.sla_printer = Sla_printer(components["file_manager"],components["analysis_queue"],components["printer_profile_manager"])
+        return self.sla_printer
     
 
     ##############################################
     #               gcode modifier               #
     ##############################################
-    #reicht nicht. printablauf zu unterschiedlich
-
-    """def get_gcode_receive_modifier(self):
-        self.gcode_modifier
-
-    def get_gcode_send_modifier(self):
-        self.gcode_modifier"""
- 
 
 
     #print("#########################################")
@@ -180,14 +190,3 @@ def __plugin_load__():
         #"octoprint.comm.protocol.gcode.error": handle_error
     }
 
-"""
-fuer neue druckercommandos 
-
-         ----siehe Bettergrblsupport plugin 
-
-kommunikation ueber udp oder serial:
-
-- bei serial alten standartdrucker verwenden und nur gcode hooks nutzen
-- fuer udp octoprint/util/comm anpassen
-
-"""

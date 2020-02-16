@@ -2,7 +2,8 @@
 #from socket import *
 import socket
 from uuid import getnode as get_mac
-
+from octoprint.filemanager.destinations import FileDestinations
+#import octoprint.filemanager
 import multiprocessing
 import struct
 
@@ -33,6 +34,7 @@ class chitu_comm():
         self.id = "28,00,26,00,0d,50,48,50"
         self.z_step_hight = "0.000625"
         self.ok_answer = str.encode("ok")
+        self.nameLastUploadedFile = None
 
         self.last_file_position_count = 0
 
@@ -61,17 +63,27 @@ class chitu_comm():
             pass
             #TODO: implemet
 
+    def printstartCP(self,cb=None):
+        if cb is not None:
+            self.printCB = cb
+
+    def shutdownService(self):
+        pass
+        #self.process_conn.send("shutdown")
+
     def start_listen_reqest(self):
+            
+            self.listen_thread = threading.Thread(target=self.listen_request)
+            self.listen_thread.daemon = True
+            self.listen_thread.start()
+            
             """
-            listen_thread = threading.Thread(target=self.listen_request)
-            listen_thread.daemon = True
-            listen_thread.start()
+            self.process_conn, child_conn = multiprocessing.Pipe()
+
+            self.udp_process = multiprocessing.Process(target=self.listen_request,args=(child_conn,))
+
+            self.udp_process.start()
             """
-
-            p = multiprocessing.Process(target=self.listen_request)
-
-            p.start()
-
     def listen_request(self):
             self.file_is_uploading = False
             
@@ -83,15 +95,26 @@ class chitu_comm():
             file_handler = None
             uploaded_file_path = None
 
+            shutdownSig = False
+
 
             while(True):
+                #print(conn.recv())
+                #if conn.recv() == "shutdown":
+                #    self.s.close()
+                #    break
 
                 try:
                     m = self.s.recvfrom(4096)
+
+
                     
                 except socket.timeout:
                     continue
 
+                except KeyboardInterrupt:
+                    self.s.close()
+                    break
                 ############################################
                 #file upload processing
                 ############################################
@@ -167,8 +190,9 @@ class chitu_comm():
                 if "M28" in m[0].decode('latin-1'):
                     #self.log.info("recive M28 start Fileupload")
                     
+    	            self.nameLastUploadedFile = m[0][3:len(m[0])].decode('latin-1')
 
-                    uploaded_file_path = self.sup._settings.global_get_basefolder("watched") + "/" + m[0][3:len(m[0])].decode('latin-1')
+                    uploaded_file_path = self.sup._settings.global_get_basefolder("watched") + "/" + self.nameLastUploadedFile
 
                     try:
 
@@ -184,10 +208,18 @@ class chitu_comm():
                     continue
 
                 if "M6030" in m[0].decode('latin-1'):
-                    #self.log.info("recive M6030 start Print")
+                    print("recive M6030 start Print")
+
+                    filenameToSelect = self.sup._file_manager.path_on_disk(FileDestinations.LOCAL, self.nameLastUploadedFile)
+                    print(filenameToSelect)
+                    self.sup.sla_printer.select_file(filenameToSelect, False, printAfterSelect=True)
+
                     self.s.sendto(self.ok_answer,m[1])
                     continue
             
+
+
+            ##self._storage(destination).file_in_path(path, file)
 
 
 
