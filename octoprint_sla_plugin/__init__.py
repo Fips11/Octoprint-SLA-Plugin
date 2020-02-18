@@ -82,7 +82,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             
             allowedExten = 'cbddlp, photon',
             deaultBaudRate = 115200,
-            additionalPorts = "/dev/ttyAMA*"
+            additionalPorts = "/dev/ttyAMA*",
             workAsFlashDrive = True, #false printer use separate flash drive
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
