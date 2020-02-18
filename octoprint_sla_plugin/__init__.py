@@ -185,7 +185,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         # Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
         # for details.
 
-        return dict(Sla_plugin=dict(  # version check: github repository
+        return dict(sla_plugin=dict(  # version check: github repository
                                              # update method: pip
             displayName='SLA Support',
             displayVersion=self._plugin_version,
