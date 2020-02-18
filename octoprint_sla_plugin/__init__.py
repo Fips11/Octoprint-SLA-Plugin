@@ -53,6 +53,24 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
     def get_extension_tree(self, *args, **kwargs):
         return dict(machinecode=dict(sla_bin=ContentTypeMapping(self.allowed.replace(" ", "").split(","), "application/octet-stream")))
+
+    ##############################################
+    #              add pi's uart                 #
+    ##############################################
+
+
+    ##############################################
+    #                change ui                   #
+    ##############################################
+
+    def get_template_configs(self):
+        return [
+
+                dict(type="tab", name="Sla-control", replaces="control" , div="control" ,template="sla_plugin_tab.jinja2" , custom_bindings=False),
+                dict(type="tab", name="Modelview", template="Modeleditor.jinja2" , custom_bindings=False)
+        ]
+    
+
     
     ##############################################
     #                  Settings                  #
@@ -61,12 +79,15 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
     def get_settings_defaults(self):
         return dict(
             
+            
             allowedExten = 'cbddlp, photon',
+            deaultBaudRate = 115200,
+            additionalPorts = "/dev/ttyAMA*"
             workAsFlashDrive = True, #false printer use separate flash drive
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
             hideTempTab = True,
-            #hideControlTab = True,
+            hideControlTab = False,
             hideGCodeTab = True,
             useHeater = False,
             heaterTemp = 30,# C
@@ -90,35 +111,8 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
         )
 
-    def rewrite_test(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
-        print(gcode)
-        #if gcode and gcode == "M107":
-            #cmd = "M106 S0"
-        return #cmd,
-    
-    def get_template_configs(self):
-        return [
-
-                dict(type="tab", name="Sla-control", replaces="control" , div="control" ,template="sla_plugin_tab.jinja2" , custom_bindings=False),
-                dict(type="tab", name="Modelview", template="Modeleditor.jinja2" , custom_bindings=False)
-        ]
-    
-
-
-    ##############################################
-    #                UDP Upload                  #
-    ##############################################
-
     def on_after_startup(self):
         
-        if self._settings.get(["chitu_comm"]):
-
-            self.Chitu_comm = chitu_comm(self)
-            self.Chitu_comm.start_listen_reqest()
-            self._logger.info("chitubox udp reciver enabeled")
-
-        
-
         self.hideTempTab = self._settings.get_boolean(["hideTempTab"])
         self.hideControlTab = self._settings.get_boolean(["hideControlTab"])
         self.hideGCodeTab = self._settings.get_boolean(["hideGCodeTab"])
@@ -129,15 +123,36 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         self._settings.global_set(["serial", "disconnectOnErrors"], False)
         #self._settings.global_set(["serial", "sdAlwaysAvailable"], False)
         #self._settings.global_set(["serial", "firmwareDetection"], False)
-        #self._settings.global_set(["serial", "baudrate"], 115200)
+        self._settings.global_set(["serial", "baudrate"], self._settings.get(["deaultBaudRate"]))
         #self._settings.global_set(["serial", "exclusive"], False)
+
+        #add raspberry uart to the avaliable ports
+        ports = self._settings.global_get(["serial", "additionalPorts"])
+        if "/dev/ttyAMA*" not in ports:
+            ports.append("/dev/ttyAMA*")
+        self._settings.global_set(["serial", "additionalPorts"], ports)
+
+        #set folder,uploads entry to mounted usb flash image
+
+
+
         #"feature""sdSupport"
         #"feature""printStartConfirmation"
         #"feature""pollWatched"
         #"folder""uploads"
         #"folder""watched"
 
+    ##############################################
+    #                UDP Upload                  #
+    ##############################################
 
+        if self._settings.get(["chitu_comm"]):
+
+            #TODO: check if we can write to watched folder
+
+            self.Chitu_comm = chitu_comm(self)
+            self.Chitu_comm.start_listen_reqest()
+            self._logger.info("chitubox udp reciver enabeled")
 
 
         #more at octoprint/settings.py
@@ -159,14 +174,26 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
         self.sla_printer = Sla_printer(components["file_manager"],components["analysis_queue"],components["printer_profile_manager"])
         return self.sla_printer
-    
 
     ##############################################
-    #               gcode modifier               #
+    #               Plugin Update                #
     ##############################################
 
+    def get_update_information(self):
 
-    #print("#########################################")
+        # Define the configuration for your plugin to use with the Software Update
+        # Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
+        # for details.
+
+        return dict(Sla_plugin=dict(  # version check: github repository
+                                             # update method: pip
+            displayName='SLA Support',
+            displayVersion=self._plugin_version,
+            type='github_release',
+            user='Fips11',
+            repo='Octoprint-SLA-Plugin',
+            current=self._plugin_version,
+            pip='https://github.com/Fips11/Octoprint-SLA-Plugin/archive/{target_version}.zip'))
 
 
 __plugin_name__ = "Sla_plugin"
@@ -178,7 +205,8 @@ def __plugin_load__():
 
 	global __plugin_hooks__
 	__plugin_hooks__ = {
-		
+		'octoprint.plugin.softwareupdate.check_config': __plugin_implementation__.get_update_information,
+
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.gcode_modifier.get_gcode_queuing_modifier,
         "octoprint.filemanager.extension_tree"  : __plugin_implementation__.get_extension_tree,
         "octoprint.filemanager.analysis.factory": __plugin_implementation__.get_sla_analysis_factory,
