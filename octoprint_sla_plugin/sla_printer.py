@@ -7,6 +7,8 @@ from octoprint.filemanager import FileDestinations, NoSuchStorage, valid_file_ty
 from octoprint.printer.standard import Printer
 from octoprint.util import is_hidden_path, to_unicode, timing
 
+import quopri
+
 import logging
 
 
@@ -154,7 +156,13 @@ class gcode_modifier():
 		pass
 
 	def get_gcode_receive_modifier(self, comm_instance, line):
-		print(line)
+
+		if not (line == "ok\r\n"):
+
+			print("######################## received #########################")
+			print(line.replace('\r\n',''))
+			print("###########################################################")
+
 		
 		if line.startswith('ok V'): # proceed hello command # ok V4.2.20.3_LCDM
 
@@ -163,8 +171,7 @@ class gcode_modifier():
 
 		else:
 			return line
-
-
+		
 
 	def get_gcode_send_modifier(self, comm_instance, phase, cmd, cmd_type, gcode,subcode=None , tags=None):
 
@@ -175,16 +182,15 @@ class gcode_modifier():
 		elif cmd.upper().startswith('M110'): #suppress lienresett
 			return (None, )
 	
-		elif cmd.upper().startswith('M105'):#suppress temppoll
-			return (None, )
-		
-		#elif cmd.upper().startswith('G90'):#suppress temppoll
-		#	return (None, )
-
-		#elif cmd.upper().startswith('G91'):#suppress temppoll
-		#	return (None, )
 		
 		else:
-			print("#####################################################")
+			print("######################## send #############################")
 			print(cmd)
-			print("#####################################################")
+			print("###########################################################")
+
+
+	def get_gcode_queuing_modifier(self, comm_instance, phase, cmd, cmd_type, gcode,subcode=None , tags=None):
+		
+		if gcode and gcode == "M105":
+			return (None,)
+

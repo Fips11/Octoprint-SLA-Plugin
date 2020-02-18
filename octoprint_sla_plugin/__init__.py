@@ -47,7 +47,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         if self._settings is None:
             return str("cbddlp, photon")
         else:
-            self._logger.info("add Extensions: %s " % self._settings.get(["allowedExten"]))
+            #self._logger.info("add Extensions: %s " % self._settings.get(["allowedExten"]))
             return str(self._settings.get(["allowedExten"]))
     
 
@@ -66,7 +66,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
             hideTempTab = True,
-            hideControlTab = True,
+            #hideControlTab = True,
             hideGCodeTab = True,
             useHeater = False,
             heaterTemp = 30,# C
@@ -89,6 +89,12 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             #  
 
         )
+
+    def rewrite_test(self, comm_instance, phase, cmd, cmd_type, gcode, *args, **kwargs):
+        print(gcode)
+        #if gcode and gcode == "M107":
+            #cmd = "M106 S0"
+        return #cmd,
     
     def get_template_configs(self):
         return [
@@ -107,16 +113,8 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         
         if self._settings.get(["chitu_comm"]):
 
-            print("#####################################################################################################")
-            print("#####################################################################################################")
-
-            print(dir(self._file_manager))
-            print("#####################################################################################################")
-            print("#####################################################################################################")
-
             self.Chitu_comm = chitu_comm(self)
             self.Chitu_comm.start_listen_reqest()
-            self.Chitu_comm.printstartCP(self.sla_printer.select_file) #TODO: TESTEN
             self._logger.info("chitubox udp reciver enabeled")
 
         
@@ -181,6 +179,7 @@ def __plugin_load__():
 	global __plugin_hooks__
 	__plugin_hooks__ = {
 		
+        "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.gcode_modifier.get_gcode_queuing_modifier,
         "octoprint.filemanager.extension_tree"  : __plugin_implementation__.get_extension_tree,
         "octoprint.filemanager.analysis.factory": __plugin_implementation__.get_sla_analysis_factory,
         "octoprint.printer.factory"             : __plugin_implementation__.get_sla_printer_factory,
