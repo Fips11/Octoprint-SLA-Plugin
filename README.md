@@ -2,8 +2,7 @@
 
 ## Setup
 
-Install via the bundled [Plugin Manager](https://github.com/foosel/OctoPrint/wiki/Plugin:-Plugin-Manager)
-or manually using this URL:
+Install via this URL:
 
     https://github.com/Fips11/Octoprint-SLA-Plugin/archive/master.zip
 
