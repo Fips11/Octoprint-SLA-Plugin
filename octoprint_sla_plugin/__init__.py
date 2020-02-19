@@ -196,7 +196,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             pip='https://github.com/Fips11/Octoprint-SLA-Plugin/archive/{target_version}.zip'))
 
 
-__plugin_name__ = "Sla_plugin"
+#__plugin_name__ = "Sla_plugin"
 __plugin_pythoncompat__ = ">=2.7,<4"
 
 def __plugin_load__():
