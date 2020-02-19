@@ -201,7 +201,6 @@ def __plugin_load__():
 	global __plugin_hooks__
 	__plugin_hooks__ = {
 		"octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
-
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.gcode_modifier.get_gcode_queuing_modifier,
         "octoprint.filemanager.extension_tree"  : __plugin_implementation__.get_extension_tree,
         "octoprint.filemanager.analysis.factory": __plugin_implementation__.get_sla_analysis_factory,
