@@ -189,7 +189,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
                                              # update method: pip
             displayName='SLA Support',
             displayVersion=self._plugin_version,
-            type="github_commit"#'github_release',
+            type="github_commit",#'github_release',
             user='Fips11',
             repo='Octoprint-SLA-Plugin',
             current=self._plugin_version,
