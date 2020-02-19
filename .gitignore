@@ -11,6 +11,9 @@ __pycache__/
 # C extensions
 *.so
 .vscode/
+OctoPrint_Sla_plugin.egg-info/
+Octoprint_SLA_plugin.egg-info/
+
 
 # Distribution / packaging
 .Python
