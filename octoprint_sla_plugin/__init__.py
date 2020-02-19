@@ -181,15 +181,10 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
     def get_update_information(self):
 
-        # Define the configuration for your plugin to use with the Software Update
-        # Plugin here. See https://github.com/foosel/OctoPrint/wiki/Plugin:-Software-Update
-        # for details.
-
-        return dict(sla_plugin=dict(  # version check: github repository
-                                             # update method: pip
-            displayName='SLA Support',
+        return dict(sla_plugin=dict(
+            displayName='SLA_Support',
             displayVersion=self._plugin_version,
-            type="github_commit",#'github_release',
+            type="github_commit",
             user='Fips11',
             repo='Octoprint-SLA-Plugin',
             current=self._plugin_version,
@@ -205,7 +200,7 @@ def __plugin_load__():
 
 	global __plugin_hooks__
 	__plugin_hooks__ = {
-		'octoprint.plugin.softwareupdate.check_config': __plugin_implementation__.get_update_information,
+		"octoprint.plugin.softwareupdate.check_config": __plugin_implementation__.get_update_information,
 
         "octoprint.comm.protocol.gcode.queuing": __plugin_implementation__.gcode_modifier.get_gcode_queuing_modifier,
         "octoprint.filemanager.extension_tree"  : __plugin_implementation__.get_extension_tree,
