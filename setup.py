@@ -18,7 +18,7 @@ plugin_version = "0.1.2"
 
 # The plugin's description. Can be overwritten within OctoPrint's internal data via __plugin_description__ in the plugin
 # module
-plugin_description = """TODO"""
+plugin_description = """TA compatibility layer for Sla printers of the Photon and Mars series"""
 
 # The plugin's author. Can be overwritten within OctoPrint's internal data via __plugin_author__ in the plugin module
 plugin_author = "Philipp Herbrich"
@@ -30,7 +30,7 @@ plugin_author_email = "philipp@herbri.ch"
 plugin_url = "https://github.com/Fips11/Octoprint-SLA-Plugin"
 
 # The plugin's license. Can be overwritten within OctoPrint's internal data via __plugin_license__ in the plugin module
-plugin_license = "AGPLv3"
+plugin_license = ""
 
 # Any additional requirements besides OctoPrint should be listed here
 plugin_requires = []
