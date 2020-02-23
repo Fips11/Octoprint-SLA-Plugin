@@ -30,41 +30,7 @@ fi
 
 #add save control script to /usr/sbin/
 echo "add script to /usr/sbin/"
-new_script="
-
-if ![ -d \"\$2\"  || \$2="" ]; then
-  exit 0
-fi
-
-updateFStab(){   
-  dictionary=\$1
-  #Befehle...
-}
-
-
-addMod(){
-  dictionary=\$1
-}
-
-checkMod(){
-  #
-}
-
-case \"\$1\" in
-
-  \"updateFStab\") updateFStab(\$2)
-            ;;
-            
-  \"addMod\") updateFStab(\$2)
-            ;;
-
-  \"checkMod\") checkMod(\$2)
-            ;;
-
-
-            *) exit 0
-            ;;
-"
+new_script=""
 
 echo "$new_script" > /etc/sbin/control-flash-host
 

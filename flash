@@ -1,0 +1,157 @@
+#!/bin/bash
+
+if ! grep -q 'Raspberry Pi Zero W' /proc/device-tree/model ; then
+  echo "emulated Flashdrivefeatue only available on the PI Zero (W)"
+  exit 1
+fi
+
+command="$1" 
+DIR="$2"  #true "~/OctoPrint-Sla_plugin/Octoprint-SLA-Plugin" | false "//root"
+USER="pi"
+
+BIN_FILEPATH="/piusb.bin"
+MOUT_POINT="/mnt/usb_share"
+FSTAB_LINE="$BIN_FILEPATH $MOUT_POINT vfat users,umask=000 0 2"
+
+#if ![ -d "$DIRECTORY" ]; then
+
+if  [ -z "${command}" ]; then
+  echo "exit"
+  exit 0
+fi
+
+if  [ -n "${DIR}" ]; then
+
+  if [ ! -d "${DIR}" ]; then
+
+  echo "no dict"
+  exit 0
+
+  fi
+
+fi
+
+updateFStab(){
+  # !!!DIR parameter not used
+
+  echo "update /etc/fstab"
+  #checkUserAccess
+  #if [ $? -eq 1 ] ; then
+  #  echo "user $USER has rights to write to $DIR"
+ 
+    sed -i "$BIN_FILEPATH/d" /etc/fstab #delete old line
+    echo "$FSTAB_LINE" >> /etc/fstab #insert new line
+
+    if [ ! -d "$MOUT_POINT" ]; then
+      echo "create Mountpoint"
+      mkdir $MOUT_POINT
+    fi
+
+    if [ ! -e "$BIN_FILEPATH" ]; then
+
+      echo "write & format new $BIN_FILEPATH"
+      dd bs=1M if=/dev/zero of=$BIN_FILEPATH count=4096
+      mkdosfs $BIN_FILEPATH -F 32 -I
+    fi
+    
+    echo "remount"
+    mount -a #remount drives  
+
+  #else
+  # echo "user $USER has !!!no rights to write to $DIR"
+  # exit 1
+  #fi
+}
+
+addMod(){
+
+  if ! grep -q 'dtoverlay=dwc2' /boot/config.txt ; then
+    echo "update /boot/config.txt"
+    echo "dtoverlay=dwc2" >> /boot/config.txt
+  fi
+
+  if  grep -q 'dwc2' /etc/modules ; then
+    echo "delete dwc2 in /etc/modules"
+    sed -i '/^dwc2/d' /etc/modules
+  fi
+
+  echo "enable Kernelmodule"
+  modprobe g_mass_storage file=$BIN_FILEPATH stall=0 ro=1
+
+  checkMod
+
+}
+
+checkMod(){
+
+  if  grep -q  'g_mass_storage' /proc/modules ; then
+    echo "kernelmodule is enabeled and configured"
+    exit 0
+  else 
+    exit 1
+  fi
+
+}
+
+
+checkUserAccess(){
+
+  #DIR=/path/to/somewhere
+
+  # Use -L to get information about the target of a symlink,
+  # not the link itself, as pointed out in the comments
+  INFO=( $(stat -L -c "0%a %G %U" "$DIR") )
+  PERM=${INFO[0]}
+  GROUP=${INFO[1]}
+  OWNER=${INFO[2]}
+
+  ACCESS=no
+  if (( ($PERM & 0002) != 0 )); then
+      # Everyone has write access
+      ACCESS=yes
+      
+  elif (( ($PERM & 0020) != 0 )); then
+      # Some group has write access.
+      # Is user in that group?
+      gs=( $(groups $USER) )
+      for g in "${gs[@]}"; do
+          if [[ $GROUP == $g ]]; then
+              ACCESS=yes
+              
+              break
+          fi
+      done
+  elif (( ($PERM & 0200) != 0 )); then
+      # The owner has write access.
+      # Does the user own the file?
+      
+      [[ $USER == $OWNER ]] && ACCESS=yes
+  fi 
+  
+  if [ "$ACCESS" = yes ] ; then 
+    return 1
+  else 
+    return 0
+  fi
+
+}
+
+case "$1" in
+
+  "updateFStab") 
+    updateFStab
+            ;;
+            
+  "addMod") 
+    addMod 
+            ;;
+
+  "checkMod") 
+    checkMod 
+            ;;
+
+            *) 
+    echo "unknown command"
+    exit 1
+            ;;
+esac
