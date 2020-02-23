@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$EUID" -ne 0 ]
+  then echo "Please run as root"
+  exit
+fi
+
 if ! grep -q 'Raspberry Pi Zero W' /proc/device-tree/model ; then
   echo "emulated Flashdrivefeatue only available on the PI Zero (W)"
   exit 1
@@ -12,8 +17,6 @@ USER="pi"
 BIN_FILEPATH="/piusb.bin"
 MOUT_POINT="/mnt/usb_share"
 FSTAB_LINE="$BIN_FILEPATH $MOUT_POINT vfat users,umask=000 0 2"
-
-#if ![ -d "$DIRECTORY" ]; then
 
 if  [ -z "${command}" ]; then
   echo "exit"
