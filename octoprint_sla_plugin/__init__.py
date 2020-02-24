@@ -4,7 +4,7 @@
 
 
 import os
-
+import logging
 
 from .chitu_comm import chitu_comm
 from .sla_analyser import sla_AnalysisQueue
@@ -67,7 +67,8 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         return [
 
                 dict(type="tab", name="Sla-control", replaces="control" , div="control" ,template="sla_plugin_tab.jinja2" , custom_bindings=False),
-                dict(type="tab", name="Modelview", template="Modeleditor.jinja2" , custom_bindings=False)
+                dict(type="tab", name="Modelview", template="Modeleditor.jinja2" , custom_bindings=False),
+                dict(type="settings", custom_bindings=False)
         ]
     
 
@@ -78,7 +79,6 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
     def get_settings_defaults(self):
         return dict(
-            
             
             allowedExten = 'cbddlp, photon',
             deaultBaudRate = 115200,
@@ -94,9 +94,9 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             heaterTime = 20,#min
             resinGauge = True,
             enableLight = False, #ir cam light
-            printerInternalConfig = [dict(
+            #printerInternalConfig = [dict(
                 #allGcodeFileEntrys
-            )],
+            #)],
             mainpowerSwitch = None,#net/gpio
             photonFileEditor = False,
             tempSensorPrinter = None,#1wire/ntc
