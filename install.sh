@@ -5,12 +5,12 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-#/boot/config.txt
+# /boot/config.txt
 
-#if ! grep -q 'dtoverlay=dwc2' /boot/config.txt ; then
+#if ! grep -q \'dtoverlay=dwc2\' /boot/config.txt ; then
 
 #    echo "change /boot/config.txt"
-#    echo "dtoverlay=dwc2" >> /boot/config.txt
+ #   echo "dtoverlay=dwc2" >> /boot/config.txt
 #fi
 
 #/etc/modules
@@ -31,23 +31,22 @@ fi
 
 
 #add save control script to /usr/sbin/
+
 echo "add flash script to /usr/sbin/"
-#new_script=""
-#echo "$new_script" > /etc/sbin/control-flash-host
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cp "$DIR/flash" "/usr/sbin/"
 chmod +x /usr/sbin/flash
 
-cp "$DIR/flash" "/usr/sbin/"
 
-echo "add control-flash-host to sudoers"
+echo "add flash to sudoers"
+
 #add own file to /etc/sudoers.d 
-own_sudoers="pi ALL=NOPASSWD: /usr/sbin/flash * *"
-
 if  grep  -q "$own_sudoers" /etc/sudoers.d/sla_plugin ; then
     echo "/etc/sudoers.d/sla_plugin already existing"
     exit 0    
 fi
 
+own_sudoers="pi ALL=NOPASSWD: /usr/sbin/flash * *"
 echo "create File: /etc/sudoers.d/sla_plugin"
 echo "$own_sudoers" | sudo EDITOR='tee -a' visudo -f /etc/sudoers.d/sla_plugin

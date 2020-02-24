@@ -1,6 +1,18 @@
 <form class="form-horizontal">
 
     <div class="control-group">
+
+        <label class="control-label">{{ _('finish installation:') }}</label>
+        
+        <div class="controls">
+            <span class="help-block">Da Octoprint nicht mit Rootrechten laufen sollte, das Flashdrivefeature aber teilweise Rootrecht benötigt, ist dafür bisher ein Workaround nötig.
+            Du müsstest dich dafür auf deinem Pi über ssh anmelden und den unten ausgeführten Befehl ausführen. Er speichrt ein Script unter /user/sbin und ergänzt die /etc/sudoers Datei. Danach 
+            kann das benötigte Kernelmodul auch ohne Rootrechte sicher verwendet werden.</span>
+            <input type="text" class="input-block-level" data-bind="value: settings.plugins.sla_plugin.allowedExten">
+        </div>
+    </div>
+
+    <div class="control-group">
         <label class="control-label">{{ _('Extensions:') }}</label>
         <div class="controls">
             <input type="text" class="input-block-level" data-bind="value: settings.plugins.sla_plugin.allowedExten">
@@ -35,7 +47,7 @@
     <div class="control-group">
         <label class="control-label">{{ _('use Resingauge:') }}</label>
         <div class="controls">
-            <input type="checkbox" data-bind="checked: settings.plugins.sla_plugin.resinGauge">
+            <input type="checkbox" data-bind="checked: settings.plugins.sla_plugin.resinGauge" disabled>
         </div>
     </div>
 
@@ -43,14 +55,14 @@
     <div class="control-group">
         <label class="control-label">{{ _('show photon Fileeditor:') }}</label>
         <div class="controls">
-            <input type="checkbox" data-bind="checked: settings.plugins.sla_plugin.photonFileEditor">
+            <input type="checkbox" data-bind="checked: settings.plugins.sla_plugin.photonFileEditor" disabled>
         </div>
     </div>
 
     <div class="control-group">
         <label class="control-label">{{ _('Powerswitchsettings:') }}</label>
         <div class="controls">
-            <select data-bind="value: settings.plugins.sla_plugin.mainpowerSwitch">
+            <select data-bind="value: settings.plugins.sla_plugin.mainpowerSwitch" disabled>
                 <option value="None">None</option>
                 <option value="gpio">gpio</option>
                 <option value="network">Network</option>
@@ -61,7 +73,7 @@
     <div class="control-group">
         <label class="control-label">{{ _('PrintTempSensorsettings:') }}</label>
         <div class="controls">
-            <select data-bind="value: settings.plugins.sla_plugin.tempSensorPrinter">
+            <select data-bind="value: settings.plugins.sla_plugin.tempSensorPrinter" disabled>
                 <option value="None">None</option>
                 <option value="1Wire">1Wie</option>
                 <option value="ntc">ntc</option>
@@ -72,7 +84,7 @@
     <div class="control-group">
         <label class="control-label">{{ _('BedTempSensorsettings:') }}</label>
         <div class="controls">
-            <select data-bind="value: settings.plugins.sla_plugin.tempSensorBed">
+            <select data-bind="value: settings.plugins.sla_plugin.tempSensorBed" disabled>
                 <option value="None">None</option>
                 <option value="1Wire">1Wire</option>
                 <option value="ntc">ntc</option>

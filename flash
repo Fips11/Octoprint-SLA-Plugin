@@ -11,12 +11,12 @@ if ! grep -q 'Raspberry Pi Zero W' /proc/device-tree/model ; then
 fi
 
 command="$1" 
-DIR="$2"  #true "~/OctoPrint-Sla_plugin/Octoprint-SLA-Plugin" | false "//root"
+DIR="$2"  #true "~/OctoPrint-Sla_plugin" | false "/root"
 USER="pi"
 
-BIN_FILEPATH="/piusb.bin"
+IMG_FILEPATH="/piusb.bin"
 MOUT_POINT="/mnt/usb_share"
-FSTAB_LINE="$BIN_FILEPATH $MOUT_POINT vfat users,umask=000 0 2"
+FSTAB_LINE="$IMG_FILEPATH $MOUT_POINT vfat users,umask=000 0 2"
 
 if  [ -z "${command}" ]; then
   echo "exit"
@@ -42,7 +42,7 @@ updateFStab(){
   #if [ $? -eq 1 ] ; then
   #  echo "user $USER has rights to write to $DIR"
  
-    sed -i "$BIN_FILEPATH/d" /etc/fstab #delete old line
+    sed -i "$IMG_FILEPATH/d" /etc/fstab #delete old line
     echo "$FSTAB_LINE" >> /etc/fstab #insert new line
 
     if [ ! -d "$MOUT_POINT" ]; then
@@ -50,11 +50,11 @@ updateFStab(){
       mkdir $MOUT_POINT
     fi
 
-    if [ ! -e "$BIN_FILEPATH" ]; then
+    if [ ! -e "$IMG_FILEPATH" ]; then
 
-      echo "write & format new $BIN_FILEPATH"
-      dd bs=1M if=/dev/zero of=$BIN_FILEPATH count=4096
-      mkdosfs $BIN_FILEPATH -F 32 -I
+      echo "write & format new $IMG_FILEPATH"
+      dd bs=1M if=/dev/zero of=$IMG_FILEPATH count=4096
+      mkdosfs $IMG_FILEPATH -F 32 -I
     fi
     
     echo "remount"
@@ -79,7 +79,7 @@ addMod(){
   fi
 
   echo "enable Kernelmodule"
-  modprobe g_mass_storage file=$BIN_FILEPATH stall=0 ro=1
+  modprobe g_mass_storage file=$IMG_FILEPATH stall=0 ro=1
 
   checkMod
 
