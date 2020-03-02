@@ -7,6 +7,7 @@ import os
 import logging
 
 from .chitu_comm import chitu_comm
+from .flash_drive_emu import flash_drive_emu
 from .sla_analyser import sla_AnalysisQueue
 from .sla_printer import Sla_printer, gcode_modifier
 from .sla_ui import *
@@ -36,6 +37,9 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         super(Sla_plugin, self).__init__(**kwargs)
     
         self.gcode_modifier = gcode_modifier()
+
+
+    
     
 
     ##############################################
@@ -84,6 +88,7 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
             deaultBaudRate = 115200,
             additionalPorts = "/dev/ttyAMA*",
             workAsFlashDrive = True, #false printer use separate flash drive
+            flashFirstRun = True,
             flashDriveImageSize = 1,#GB
             chitu_comm = True,
             hideTempTab = True,
@@ -121,10 +126,10 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
 
         self._settings.global_set(["serial", "helloCommand"], self._settings.get(["helloCommand"]))
         self._settings.global_set(["serial", "disconnectOnErrors"], False)
-        #self._settings.global_set(["serial", "sdAlwaysAvailable"], False)
-        #self._settings.global_set(["serial", "firmwareDetection"], False)
+        self._settings.global_set(["serial", "sdAlwaysAvailable"], False)
+        self._settings.global_set(["serial", "firmwareDetection"], False)
         self._settings.global_set(["serial", "baudrate"], self._settings.get(["deaultBaudRate"]))
-        #self._settings.global_set(["serial", "exclusive"], False)
+        self._settings.global_set(["serial", "exclusive"], False)
 
         #add raspberry uart to the avaliable ports
         ports = self._settings.global_get(["serial", "additionalPorts"])
@@ -141,6 +146,22 @@ class Sla_plugin(   octoprint.plugin.SettingsPlugin,
         #"feature""pollWatched"
         #"folder""uploads"
         #"folder""watched"
+    ##############################################
+    #            USB Flash Feature               #
+    ##############################################
+
+        if self.workAsFlashDrive : ## nicht getestet
+            try:
+                self.flash =  flash_drive_emu( self._settings.get_boolean(["flashFirstRun"]) )
+                if self.flash.errorcode = 0:
+                    self._settings.set_boolean(["flashFirstRun"], False)
+
+            except Exception as identifier:
+                print(identifier)
+                self.flash = None
+
+
+
 
     ##############################################
     #                UDP Upload                  #
